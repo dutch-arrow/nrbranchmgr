@@ -1,4 +1,9 @@
 /temp.json
 /target/
 /.settings/
-/nrbranchmgr.log
+/src/main/resources/static/css/
+/src/main/resources/static/favicon.ico
+/src/main/resources/static/index.html
+/src/main/resources/static/js/
+/src/main/vue/node_modules/
+
