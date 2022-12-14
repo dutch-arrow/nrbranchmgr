@@ -24,7 +24,7 @@
 <script>
 export default {
   name: 'RemoveBranches',
-  props: ['uptodate', 'branchName', 'wcLocation', 'remoteUrl', 'currentBranchRev', 'latestBranchRevs', 'latestTrunkRevs', 'highestTrunkRevInBranch', 'showPage'],
+  props: ['branchName', 'showPage'],
   data() {
     return {
       myBranches: [],

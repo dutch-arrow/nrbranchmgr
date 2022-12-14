@@ -23,6 +23,7 @@ import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import io.undertow.util.Headers;
 import nl.das.nrbranchmgr.apihandlers.ChangedNodesHandler;
 import nl.das.nrbranchmgr.apihandlers.ChangedUiHandler;
+import nl.das.nrbranchmgr.apihandlers.CommitBranchHandler;
 import nl.das.nrbranchmgr.apihandlers.CreateBranchHandler;
 import nl.das.nrbranchmgr.apihandlers.GetCurrentBranchHandler;
 import nl.das.nrbranchmgr.apihandlers.GetMyBranchesHandler;
@@ -67,6 +68,7 @@ public class Webserver {
 	        // REST API path
 	        .addPrefixPath("/api", Handlers.routing()
 	        		.post("/getbranch", new BlockingHandler(new GetCurrentBranchHandler(props)))
+	        		.post("/commitbranch/{msg}", new BlockingHandler(new CommitBranchHandler(props)))
 	        		.post("/getbranches", new BlockingHandler(new GetMyBranchesHandler(props)))
 	        		.post("/createbranch/{name}", new BlockingHandler(new CreateBranchHandler(props)))
 	        		.post("/updatebranch", new BlockingHandler(new UpdateBranchHandler(props)))

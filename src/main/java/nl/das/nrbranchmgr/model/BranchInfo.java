@@ -14,6 +14,7 @@ package nl.das.nrbranchmgr.model;
  */
 public class BranchInfo {
 
+	private int isDirty; // 0 if not dirty, > 0 dirty: bit 1=flow, bit 2=html, bit 3=js, bit 4=css
 	private boolean uptodate;
 	private String branchName;
 	private String wcLocation;
@@ -23,6 +24,12 @@ public class BranchInfo {
 	private long latestTrunkRevs[];  // 0=flows.json, 1=index.html, 2=index.js, 3=index.css
 	private long highestTrunkRevInBranch;
 
+	public int isDirty () {
+		return this.isDirty;
+	}
+	public void setDirty (int isDirty) {
+		this.isDirty = isDirty;
+	}
 	public boolean isUptodate () {
 		return this.uptodate;
 	}

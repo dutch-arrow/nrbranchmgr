@@ -3,29 +3,31 @@
   <b-row>
     <b-col>
       <b-card title="Enter your SVN credentials" style="margin:auto;width:fit-content">
-        <b-container>
-            <b-row>
-              <b-col cols="3">
-                <label class="col-form-label col-lg-1" for="name-input" style="width:auto;">Username</label>
-              </b-col>
-              <b-col cols="9">
-                <b-form-input id="name-input" v-model="uname" :state="nameState" required aria-describedby="input-required1"></b-form-input>
-                <b-form-invalid-feedback id="input-required1">Input is required</b-form-invalid-feedback>
-              </b-col>
-             </b-row>
-            <b-row>
-              <b-col cols="3">
-                <label class="col-form-label col-lg-1" for="pwd-input" style="width:auto;">Password</label>
-              </b-col>
-              <b-col cols="9">
-                <b-form-input id="pwd-input" v-model="pwd" type="password" :state="pwdState" required aria-describedby="input-required2"></b-form-input>
-                <b-form-invalid-feedback id="input-required2">Input is required</b-form-invalid-feedback>
-              </b-col>
-            </b-row>
-            <b-row class="mt-2">
-              <b-button @click="handleLoginSubmit" variant="primary">Save</b-button>
-            </b-row>
-        </b-container>
+        <b-form @submit="handleLoginSubmit">
+          <b-container>
+              <b-row>
+                <b-col cols="3">
+                  <label class="col-form-label col-lg-1" for="name-input" style="width:auto;">Username</label>
+                </b-col>
+                <b-col cols="9">
+                  <b-form-input id="name-input" v-model="uname" autocomplete="name" :state="nameState" required aria-describedby="input-required1"></b-form-input>
+                  <b-form-invalid-feedback id="input-required1">Input is required</b-form-invalid-feedback>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="3">
+                  <label class="col-form-label col-lg-1" for="pwd-input" style="width:auto;">Password</label>
+                </b-col>
+                <b-col cols="9">
+                  <b-form-input id="pwd-input" v-model="pwd" type="password" autocomplete="current-password" :state="pwdState" required aria-describedby="input-required2"></b-form-input>
+                  <b-form-invalid-feedback id="input-required2">Input is required</b-form-invalid-feedback>
+                </b-col>
+              </b-row>
+              <b-row class="mt-2">
+                <b-button type="submit" variant="primary">Save</b-button>
+              </b-row>
+          </b-container>
+        </b-form>
       </b-card>
     </b-col>
   </b-row>

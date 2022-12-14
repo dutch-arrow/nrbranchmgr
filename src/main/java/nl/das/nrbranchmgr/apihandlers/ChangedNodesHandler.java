@@ -67,6 +67,7 @@ public class ChangedNodesHandler implements HttpHandler {
 		if (exchange.getRequestMethod().toString().equalsIgnoreCase("POST")) {
         	try {
         		String json = new String(exchange.getInputStream().readAllBytes());
+        		System.out.println(json);
         		BranchInfo bi = Utils.parser().fromJson(new StringReader(json), BranchInfo.class);
 				long highestTrunkRevision = Arrays.stream(bi.getLatestTrunkRevs()).max().getAsLong();
 				long highestTrunkRevInBranch = bi.getHighestTrunkRevInBranch();
@@ -86,22 +87,22 @@ public class ChangedNodesHandler implements HttpHandler {
 			}
 		}
 	}
-    private static String getDiffBranchFlows(String branchFlow, String liveFlow) throws UnsupportedEncodingException {
+    private static String getDiffBranchFlows(String branchFlow, String trunkFlow) throws UnsupportedEncodingException {
         try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter("flows_branch.json"));
 			writer.write(branchFlow);
 			writer.close();
 			writer = new BufferedWriter(new FileWriter("flows_live.json"));
-			writer.write(liveFlow);
+			writer.write(trunkFlow);
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
         mergedNodes = new ArrayList<>();
         List<FlowNode> brFlowNodes = getFlowNodes(branchFlow);
-        List<FlowNode> lvFlowNodes = getFlowNodes(liveFlow);
+        List<FlowNode> lvFlowNodes = getFlowNodes(trunkFlow);
         getNonFlowNodes(branchFlow);
-        getNonFlowNodes(liveFlow);
+        getNonFlowNodes(trunkFlow);
         List<FlowNode> nodeOnlyInLive = new ArrayList<>();
         List<FlowNode> nodeChanged = new ArrayList<>();
         for (FlowNode lf : lvFlowNodes) {

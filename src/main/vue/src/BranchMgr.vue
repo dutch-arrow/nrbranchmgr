@@ -3,30 +3,21 @@
     <b-dropdown id="dropdown-1" text="Menu" variant="primary">
       <b-dropdown-item-button v-on:click="showThePage('home')">Home</b-dropdown-item-button>
       <b-dropdown-item-button v-on:click="showThePage('newBranch')">Create a new Branch</b-dropdown-item-button>
-      <b-dropdown-item-button :disabled="uptodate" v-on:click="showThePage('mergeFlow')">Merge Trunk Flows into Branch</b-dropdown-item-button>
-      <b-dropdown-item-button :disabled="uptodate" v-on:click="showThePage('mergeUI')"  >Merge Trunk UI into Branch</b-dropdown-item-button>
-      <b-dropdown-item-button :disabled="uptodate" v-on:click="showThePage('updBranch')">Update Branch</b-dropdown-item-button>
       <b-dropdown-item-button v-on:click="showThePage('remBranch')">Remove Branches</b-dropdown-item-button>
     </b-dropdown>
     <div class="navbar-menu-title">Web UI</div>
     <b-button v-on:click="resetCredentials" class="mr-2" variant="primary" style="float:right">Reset credentials</b-button>
    </b-navbar>
     <login v-show="showLogin" @hideLogin="showLogin=false"></login>
-    <home @setCurBranch="setCurBranch" :showPage="activePage === 'home' && !showLogin"></home>
-    <create-branch v-bind="curBranchInfo" :showPage="activePage === 'newBranch' && !showLogin"></create-branch>
-    <merge-trunk-flow v-bind="curBranchInfo" :showPage="activePage === 'mergeFlow' && !showLogin"></merge-trunk-flow>
-    <merge-trunk-ui v-bind="curBranchInfo" :showPage="activePage === 'mergeUI' && !showLogin"></merge-trunk-ui>
-    <update-branch v-bind="curBranchInfo" :showPage="activePage === 'updBranch' && !showLogin"></update-branch>
-    <remove-branches v-bind="curBranchInfo" :showPage="activePage === 'remBranch' && !showLogin"></remove-branches>
+    <home :showPage="activePage === 'home' && !showLogin"></home>
+    <create-branch :showPage="activePage === 'newBranch' && !showLogin"></create-branch>
+    <remove-branches :branchName="branchName" :showPage="activePage === 'remBranch' && !showLogin"></remove-branches>
 </template>
 
 <script>
 import Login from './components/Login.vue'
 import Home from './components/Home.vue'
 import CreateBranch from './components/CreateBranch.vue'
-import MergeTrunkFlow from './components/MergeTrunkFlow.vue'
-import MergeTrunkUi from './components/MergeTrunkUi.vue'
-import UpdateBranch from './components/UpdateBranch.vue'
 import RemoveBranches from './components/RemoveBranches.vue'
 
 export default {
@@ -35,9 +26,6 @@ export default {
     Home,
     Login,
     CreateBranch,
-    MergeTrunkFlow,
-    MergeTrunkUi,
-    UpdateBranch,
     RemoveBranches
   },
   data() {
@@ -50,8 +38,8 @@ export default {
       pwd: "",
       pwdState: null,
       activePage: "",
-      curBranchInfo: {},
       uptodate: false,
+      branchName: '',
     }
   },
   methods: {
@@ -82,8 +70,6 @@ export default {
     showThePage(page) {
       this.activePage = page;
       if (page === 'remBranch') this.emitter.emit('RemoveBranches');
-      if (page === 'mergeFlow' && !this.uptodate) this.emitter.emit('MergeFlow');
-      if (page === 'mergeUI' && !this.uptodate) this.emitter.emit('MergeUi');
     },
     /*
     * Handle the "Reset credentials"-button press
@@ -96,10 +82,10 @@ export default {
   // Lifecycle hooks are called at different stages of a component's lifecycle.
   // This function will be called when the component is mounted.
   mounted() {
-		this.emitter.on('SetCurBranch', (branchInfo) => {
-      this.curBranchInfo = branchInfo;
-      this.uptodate = branchInfo.uptodate;
-		});
+    this.emitter.on("SetCurBranch", (name) => {
+      console.log("SetCurBranch request: " + name.branchName);
+      this.branchName = name.branchName;
+    });
     this.checkCookies();
     this.showThePage("home");
   }

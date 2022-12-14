@@ -9,14 +9,6 @@
 export default {
   name: "UpdateBranch",
   props: [
-    "uptodate",
-    "branchName",
-    "wcLocation",
-    "remoteUrl",
-    "currentBranchRev",
-    "latestBranchRevs",
-    "latestTrunkRevs",
-    "highestTrunkRevInBranch",
     "showPage",
   ],
   data() {
@@ -61,6 +53,7 @@ export default {
             this.retrieveResult = f;
             this.errmsg = "success";
             this.loading = false;
+            
           }
         })
         .catch((error) => {

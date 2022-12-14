@@ -55,44 +55,57 @@ public class UpdateBranchHandler implements HttpHandler {
 		if (exchange.getRequestMethod().toString().equalsIgnoreCase("POST")) {
 			try {
 				String upjson = new String(exchange.getInputStream().readAllBytes());
+//				System.out.println(upjson);
 				JsonObject jsonObject = Json.createReader(new StringReader(upjson)).readObject();
+				boolean needToCommit = false;
 				// Nodes
 				JsonArray jsonArray = jsonObject.getJsonArray("nodes");
-				for (Object jo : jsonArray) {
-					JsonObject obj = (JsonObject) jo;
-					String type = obj.getJsonObject("nodeContent").getString("type");
-					mergedNodes.add(new Node(obj.getString("nodeId"), type, obj.getJsonObject("nodeContent")));
+				if (jsonArray != null) {
+					for (Object jo : jsonArray) {
+						JsonObject obj = (JsonObject) jo;
+						String type = obj.getJsonObject("nodeContent").getString("type");
+						mergedNodes.add(new Node(obj.getString("nodeId"), type, obj.getJsonObject("nodeContent")));
+					}
+					// Do final merge
+					JsonArrayBuilder newFlows =Json.createArrayBuilder();
+					List<Node> newNodes = new ArrayList<>();
+					newNodes.addAll(mergedNodes);
+					for (Node n : newNodes) {
+						newFlows.add(n.getJson());
+					}
+					JsonArray ja = newFlows.build();
+					if (ja.size() > 0) {
+						String json = Utils.parser().toJson(ja);
+						this.svn.updateFlow(json);
+					}
+					System.out.println("Flow updated");
+					needToCommit = true;
 				}
-				// Do final merge
-				JsonArrayBuilder newFlows =Json.createArrayBuilder();
-				List<Node> newNodes = new ArrayList<>();
-				newNodes.addAll(mergedNodes);
-				for (Node n : newNodes) {
-					newFlows.add(n.getJson());
-				}
-				String json = Utils.parser().toJson(newFlows.build());
-				this.svn.updateFlow(json);
-				System.out.println("Flow updated");
 				// HTML
 				JsonValue ui = jsonObject.get("html");
 				if ((ui != null) && (jsonObject.getString("html").length() > 0)) {
 					this.svn.updateUi("html", jsonObject.getString("html"));
 					System.out.println("HTML updated");
+					needToCommit = true;
 				}
 				// JS
 				ui = jsonObject.get("js");
 				if ((ui != null) && (jsonObject.getString("js").length() > 0)) {
 					this.svn.updateUi("js", jsonObject.getString("js"));
 					System.out.println("JS updated");
+					needToCommit = true;
 				}
 				// CSS
 				ui = jsonObject.get("css");
 				if ((ui != null) && (jsonObject.getString("css").length() > 0)) {
 					this.svn.updateUi("css", jsonObject.getString("css"));
 					System.out.println("CSS updated");
+					needToCommit = true;
 				}
-				// and commit the changes
-				this.svn.commit("PreMerge");
+				if (needToCommit) {
+					// and commit the changes
+					this.svn.commit("PreMerge");
+				}
 				// Register branch as been merged with latest trunk
 				this.svn.merge(true, null);
 				// and commit the registration

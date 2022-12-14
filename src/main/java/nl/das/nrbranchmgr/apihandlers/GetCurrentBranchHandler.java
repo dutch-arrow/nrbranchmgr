@@ -55,6 +55,7 @@ public class GetCurrentBranchHandler implements HttpHandler {
 				long highestTrunkRevision = Arrays.stream(bi.getLatestTrunkRevs()).max().getAsLong();
 				long highestTrunkRevInBranch = bi.getHighestTrunkRevInBranch();
 				bi.setUptodate(highestTrunkRevision <= highestTrunkRevInBranch);
+				bi.setDirty(this.svn.isWCDirty());
 				exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
 				exchange.getResponseSender().send(Utils.parser().toJson(bi));
 			} catch (SVNException | UnsupportedEncodingException e) {

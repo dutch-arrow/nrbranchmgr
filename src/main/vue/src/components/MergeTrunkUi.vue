@@ -75,7 +75,7 @@
 <script>
 export default {
 	name: 'MergeTrunkUi',
-	props: ['uptodate', 'branchName', 'wcLocation', 'remoteUrl', 'currentBranchRev', 'latestBranchRevs', 'latestTrunkRevs', 'highestTrunkRevInBranch','showPage'],
+	props: ['showPage'],
 	data() {
 		return {
 			showMsg: [false,false,false],
@@ -84,6 +84,17 @@ export default {
 			loading: false,
 			ui: {html:[], js:[], css:[]},
 			merged: [false,false,false],
+      supportsPassive: false,
+      same: false,
+      branchInfo: {
+        branchName: '', 
+        wcLocation: '', 
+        remoteUrl: '', 
+        currentBranchRev: 0, 
+        latestBranchRevs:[0,0,0,0], 
+        latestTrunkRevs:[0,0,0,0],
+        highestTrunkRevInBranch: 0,
+      },
 		}
 	},
 	methods: {
@@ -100,8 +111,8 @@ export default {
 			var el1 = elems[0];
 			var el2 = elems[1];
 			// clearing existing listeners
-			el1.removeEventListener('scroll', el1.syn, 0);
-			el2.removeEventListener('scroll', el2.syn, 0);
+			el1.removeEventListener('scroll', el1.syn, this.supportsPassive ? { passive: true } : false);
+			el2.removeEventListener('scroll', el2.syn, this.supportsPassive ? { passive: true } : false);
 			// setting-up the new listeners
 			el1.eX = el1.eY = el2.eX = el2.eY = 0;
 			this.syncScroll(el1, el2);
@@ -123,7 +134,7 @@ export default {
 				if (updateY && Math.round(otherEl.scrollTop -
 					(scrollY = otherEl.eY = Math.round(yRate * (otherEl.scrollHeight - otherEl.clientHeight))))
 				) {otherEl.scrollTop = scrollY;}
-			}, 0);
+			}, this.supportsPassive ? { passive: true } : false);
 		},
 		/*
 		* Retrieve the changed data of the UI files
@@ -134,28 +145,33 @@ export default {
 			this.html = "";
 			this.js = "";
 			this.css = "";
-			if (this.latestBranchRevs[1] == 0 && this.latestBranchRevs[2] == 0 && this.latestBranchRevs[3] == 0 &&
-				this.latestTrunkRevs[1] == 0 && this.latestTrunkRevs[2] == 0 && this.latestTrunkRevs[3] == 0) {
+			if (this.branchInfo.latestBranchRevs[1] == 0 && this.branchInfo.latestBranchRevs[2] == 0 && this.branchInfo.latestBranchRevs[3] == 0 &&
+				this.branchInfo.latestTrunkRevs[1] == 0 && this.branchInfo.latestTrunkRevs[2] == 0 && this.branchInfo.latestTrunkRevs[3] == 0) {
 				// No UI present
 				this.showMsg = [true, true, true];
 				this.merged = [true, true, true];
 				this.retrieveResult = ["No UI present", "No UI present", "No UI present"];
+        this.same = true;
+        console.log("No UI present");
+        this.emitter.emit("UiIsTheSame", true);
 			} else {
 				this.loading = true;
 				this.axios.post("/changeduis", {
-				'branchName':this.branchName,
-				'wcLocation':this.wcLocation, 
-				'remoteUrl':this.remoteUrl, 
-				'currentBranchRev':this.currentBranchRev, 
-				'latestBranchRevs':this.latestBranchRevs, 
-				'latestTrunkRevs':this.latestTrunkRevs, 
-				'highestTrunkRevInBranch':this.highestTrunkRevInBranch })
+				'branchName':this.branchInfo.branchName,
+				'wcLocation':this.branchInfo.wcLocation, 
+				'remoteUrl':this.branchInfo.remoteUrl, 
+				'currentBranchRev':this.branchInfo.currentBranchRev, 
+				'latestBranchRevs':this.branchInfo.latestBranchRevs, 
+				'latestTrunkRevs':this.branchInfo.latestTrunkRevs, 
+				'highestTrunkRevInBranch':this.branchInfo.highestTrunkRevInBranch })
 				.then(response => {
 					var f = response.data;
+          this.same = true;
 					if (f.html === "") {
 						this.showMsg[0] = true;
 						this.retrieveResult[0] = "htmls are the same";
 						this.merged[0] = true;
+            this.same &= true;
 					} else {
 						this.ui.html = f.html;
 					}
@@ -163,6 +179,7 @@ export default {
 						this.showMsg[1] = true;
 						this.retrieveResult[1] = "javascripts are the same";
 						this.merged[1] = true;
+            this.same &= true;
 					} else {
 						this.ui.js = f.js;
 					}
@@ -170,10 +187,12 @@ export default {
 						this.showMgs[2] = true;
 						this.retrieveResult[2] = "csses are the same";
 						this.merged[2] = true;
+            this.same &= true;
 					} else {
 						this.ui.css = f.css;
 					}
 					this.loading = false;
+          this.emitter.emit("UiIsTheSame", this.same);
 				})
 				.catch(error => {
 //					console.log(error.message);
@@ -202,33 +221,44 @@ export default {
 				this.merged[3] = true;
 			}
 		},
-		/*
-		* Check if all is merged
-		*/
-		areAllMerged() {
-			var allMerged = this.merged[0] && this.merged[1] && this.merged[2];
-			this.emitter.emit('UiMerged', allMerged);
-		},
 	},
 	mounted() {
-		this.emitter.on('MergeUi', () => {
-//			console.log("MergeUi request");
+    // Test via a getter in the options object to see if the passive property is accessed
+    this.supportsPassive = false;
+    try {
+      var opts = Object.defineProperty({}, 'passive', {
+        get: function() {
+          this.supportsPassive = true;
+          return true;
+        }
+      });
+      window.addEventListener("testPassive", null, opts);
+      window.removeEventListener("testPassive", null, opts);
+    } catch (e) { console.log(e); }
+		this.emitter.on('MergeUi', (bi) => {
+			console.log("MergeUi request:", bi);
+      this.branchInfo = bi;
 			this.getUiDiff();
 		});
+    this.emitter.on('IsUiTheSame', () => {
+      console.log("IsUiTheSame request");
+      this.emitter.emit("UiIsTheSame", {same: this.same});
+    });
 		this.emitter.on('IsUiMerged', () => {
-//			console.log("IsUiMerged request");
-			this.areAllMerged();
+			console.log("IsUiMerged request");
+			var allMerged = this.merged[0] && this.merged[1] && this.merged[2];
+			this.emitter.emit('UiMerged', allMerged);
 		});
 		this.emitter.on('GetChangedHtml', () => {
-//			console.log("GetChangedHtml request");
+			console.log("GetChangedHtml request");
 			this.emitter.emit('ChangedHtml', this.html);
 		});
 		this.emitter.on('GetChangedJs', () => {
-//			console.log("GetChangedJs request");
+			console.log("GetChangedJs request");
 			this.emitter.emit('ChangedJs', this.js);
 		});
 		this.emitter.on('GetChangedCss', () => {
-//			console.log("GetChangedCss request");
+			console.log("GetChangedCss request");
 			this.emitter.emit('ChangedCss', this.css);
 		});
 	}

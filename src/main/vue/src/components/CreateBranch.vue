@@ -32,7 +32,7 @@
 <script>
 export default {
   name: 'CreateBranch',
-  props: ['uptodate', 'branchName', 'wcLocation', 'remoteUrl', 'currentBranchRev', 'latestBranchRevs', 'latestTrunkRevs', 'highestTrunkRevInBranch','showPage'],
+  props: ['showPage'],
   data() {
     return {
       remCurBranch: false,

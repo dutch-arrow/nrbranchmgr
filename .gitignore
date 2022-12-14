@@ -7,3 +7,6 @@
 /src/main/resources/static/js/
 /src/main/vue/node_modules/
 
+/flows_branch.json
+/flows_live.json
+/nrbranchmgr.log
