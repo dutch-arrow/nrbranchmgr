@@ -9,9 +9,17 @@
 
 package nl.das.nrbranchmgr.apihandlers;
 
+import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Deque;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.json.Json;
+import javax.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,21 +50,31 @@ public class CreateBranchHandler implements HttpHandler {
 		this.svn = new SvnActions(props);
 		if (exchange.getRequestMethod().toString().equalsIgnoreCase("POST")) {
 			try {
+				String newBranch;
 				Map<String, Deque<String>> parms = exchange.getQueryParameters();
 				Deque<String> req= parms.get("name");
-				if (req != null) {
-					String parts[] = req.pop().split(":");
-					if (parts.length == 2) {
-						this.svn.removeBranch(parts[1]);
-					}
-					this.svn.createBranch(parts[0]);
-					exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-					exchange.getResponseSender().send("");
-				} else {
-					exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-					exchange.getResponseSender().send("No branch name given.");
+				if (req == null) {
+					throw new Exception("No branch name given.");
 				}
-			} catch(Exception e) {
+				newBranch = req.pop();
+				System.out.println("New branch: '" + newBranch + "'");
+				String upjson = new String(exchange.getInputStream().readAllBytes());
+				System.out.println(upjson);
+				JsonObject jsonObject = Json.createReader(new StringReader(upjson)).readObject();
+				String curBranch = jsonObject.getString("branchName");
+				String archFolder = jsonObject.getString("archFolder");
+				if (archFolder.length() == 0) {
+					this.svn.removeBranch(curBranch);
+				} else if (Files.exists(Path.of(archFolder), new LinkOption[0])) {
+					Files.copy(Path.of(props.getProperty("workdir")), Path.of(archFolder, curBranch), new StandardCopyOption[0]);
+				} else {
+					throw new Exception("Folder '" + archFolder + " doesn't exist");
+				}
+				this.svn.createBranch(newBranch);
+				exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+				exchange.getResponseSender().send("");
+			} catch (Exception e) {
+				e.printStackTrace();
 				exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
 				exchange.getResponseSender().send(e.getMessage());
 			}

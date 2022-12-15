@@ -4,7 +4,11 @@
       <b-container fluid style="padding-left: 0;">
         <b-row>
           <b-col>
-            <b-form-checkbox id="cb1" class="mb-2" v-model="remCurBranch" value=false unchecked-value="keep">Remove current branch?</b-form-checkbox>
+            <b-form-checkbox id="cb1" class="mb-2" v-model="remCurBranch">Replace current branch?</b-form-checkbox>
+            <div v-show="!remCurBranch">
+              <label>Archive Folder (full path)</label>
+              <b-form-input v-model="archFolder" class="border"></b-form-input>
+            </div>
           </b-col>
         </b-row>
         <b-row>
@@ -35,7 +39,8 @@ export default {
   props: ['showPage'],
   data() {
     return {
-      remCurBranch: false,
+      remCurBranch: true,
+      archFolder: '',
       curBranchName: '',
       newBranchName: '',
       loading: false,
@@ -54,11 +59,8 @@ export default {
       this.loading = true;
       this.retrieveResult = "";
       this.errmsg = "success";
-      var url = "/api/createbranch/" + this.newBranchName
-      if (this.remCurBranch) {
-        url += ":" + this.curBranchName;
-      }
-      this.axios.post(url)
+      var url = "/api/createbranch/" + this.newBranchName;
+      this.axios.post(url, {branchName: this.curBranchName, archFolder: this.archFolder})
         .then(response => {
           var f = response.data;
           if (String(f).length > 0) {
@@ -78,7 +80,10 @@ export default {
     }
   },
   mounted() {
-
+    this.emitter.on("SetCurBranch", (name) => {
+//      console.log("SetCurBranch request: " + name.branchName);
+      this.curBranchName = name.branchName;
+    });
   }
 }
 </script>

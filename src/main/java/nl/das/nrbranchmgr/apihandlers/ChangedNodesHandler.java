@@ -67,7 +67,7 @@ public class ChangedNodesHandler implements HttpHandler {
 		if (exchange.getRequestMethod().toString().equalsIgnoreCase("POST")) {
         	try {
         		String json = new String(exchange.getInputStream().readAllBytes());
-        		System.out.println(json);
+//        		System.out.println(json);
         		BranchInfo bi = Utils.parser().fromJson(new StringReader(json), BranchInfo.class);
 				long highestTrunkRevision = Arrays.stream(bi.getLatestTrunkRevs()).max().getAsLong();
 				long highestTrunkRevInBranch = bi.getHighestTrunkRevInBranch();
