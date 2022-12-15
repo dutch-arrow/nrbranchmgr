@@ -230,12 +230,12 @@ export default {
       window.removeEventListener("testPassive", null, opts);
     } catch (e) { console.log(e); }
     this.emitter.on('MergeFlow', (bi) => {
-      console.log("MergeFlow request:", bi);
+//      console.log("MergeFlow request:", bi);
       this.branchInfo = bi;
       this.getFlowDiff()
     });
     this.emitter.on('AreFlowsMerged', () => {
-      console.log("AreFlowsMerged request");
+//      console.log("AreFlowsMerged request");
       this.merged = true;
       for (var row of this.changedNodes) {
         this.merged = this.merged && row.merged;
@@ -243,7 +243,7 @@ export default {
       this.emitter.emit('FlowsMerged', this.merged);
     });
     this.emitter.on('GetChangedNodes', () => {
-      console.log("GetChangedNodes request");
+//      console.log("GetChangedNodes request");
       this.emitter.emit('ChangedNodes', {added: this.addedNodes, changed: this.changedNodes});
     });
     this.showMergeCode = false;

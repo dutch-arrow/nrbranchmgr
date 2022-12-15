@@ -75,7 +75,7 @@ export default {
     * Handle the "Reset credentials"-button press
     */
     resetCredentials() {
-      console.log("Reset credentials");
+//      console.log("Reset credentials");
       this.showLogin = true;
     },
   },
@@ -83,7 +83,7 @@ export default {
   // This function will be called when the component is mounted.
   mounted() {
     this.emitter.on("SetCurBranch", (name) => {
-      console.log("SetCurBranch request: " + name.branchName);
+//      console.log("SetCurBranch request: " + name.branchName);
       this.branchName = name.branchName;
     });
     this.checkCookies();

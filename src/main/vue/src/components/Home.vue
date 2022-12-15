@@ -191,7 +191,7 @@ export default {
         this.axios.post("/api/getbranch")
         .then(response => {
             var f = response.data;
-            console.log(f);
+//            console.log(f);
             if (String(f).startsWith("svn")) {
               this.retrieveResult = f;
               this.loading = false;
@@ -359,15 +359,15 @@ export default {
     });
     this.getCurrentBranch();
     this.emitter.on("FlowsAreTheSame", (same) => {
-      console.log("FlowsAreTheSame request: ", same);
+//      console.log("FlowsAreTheSame request: ", same);
       this.showMergeFlowsButton = !same;
     });
     this.emitter.on("FlowsMerged", (flowsMerged) => {
-      console.log("FlowsMerged request: ", flowsMerged);
+//      console.log("FlowsMerged request: ", flowsMerged);
       this.flowsAreMerged(flowsMerged);
     });
     this.emitter.on("ChangedNodes", (nodes) => {
-      console.log("ChangedNodes request");
+//      console.log("ChangedNodes request");
       for (var a of nodes.added) {
         if (a.add) {
           this.mergedNodes.push({
@@ -383,25 +383,25 @@ export default {
       this.emitter.emit("IsUiMerged");
     });
     this.emitter.on("UiIsTheSame", (same) => {
-      console.log("UiIsTheSame request", same);
+//      console.log("UiIsTheSame request", same);
       this.showMergeUiButton = !same;
     });
     this.emitter.on("UiMerged", (uiMerged) => {
-      console.log("UiMerged request", uiMerged);
+//      console.log("UiMerged request", uiMerged);
       this.uiIsMerged(uiMerged);
     });
     this.emitter.on("ChangedHtml", (changedHtml) => {
-      console.log("ChangedHtml request");
+//      console.log("ChangedHtml request");
       this.html = changedHtml;
       this.htmlMerged = true; 
     });
     this.emitter.on("ChangedJs", (changedJs) => {
-      console.log("ChangedJs request");
+//      console.log("ChangedJs request");
       this.js = changedJs;
       this.jsMerged = true; 
     });
     this.emitter.on("ChangedCss", (changedCss) => {
-      console.log("ChangedCss request");
+//      console.log("ChangedCss request");
       this.css = changedCss;
       this.cssMerged = true; 
     });
